@@ -3,7 +3,7 @@
 #include "peanats/internal/logger.h"
 #include "peanats/internal/message.h"
 #include "peanats/internal/token.h"
-#include "peanats/internal/recv_buffer.h"
+#include "peanats/internal/receiver.h"
 
 #include <inttypes.h>
 #include <vector>
@@ -53,7 +53,7 @@ protected:
   // --------------------------------------------------------------------------
 public:
   //! Parse a 'RecvBuffer' and clear consumed content when done
-  inline void ragel_parser(RecvBuffer&);
+  inline void ragel_parser(Receiver&);
   inline const int first_final_state();
 
   //! Reset the state of the parser
@@ -62,33 +62,33 @@ public:
 
   //! calls the ragel parser and does adjustments to the buffer
   //! afterwards
-  inline void parse(RecvBuffer& buf)
+  inline void parse(Receiver& receiver)
   {
-    ragel_parser(buf);
+    ragel_parser(receiver);
 
     // if we've finished without any started tokesm we've consumed the
     // whole buffer and can reset it
     if (tokens.empty()) {
       debug_logn("Finished in state without any tokens " + std::to_string(cs) + " and consumed the buffer");
-      buf.clear();
+      receiver.clear();
       return;
     }
 
     // Otherwise we may need to shift the buffer, but if we still have space
     // to recevice data, we'll wait until really full
-    if (buf.want()) {
+    if (receiver.want()) {
       return;
     }
 
     // if the first token is not already at the start of the buffer
     // we move the data that needs saving to the front of the buffer
-    if (tokens.front()._ptr != buf.data()) {
+    if (tokens.front()._ptr != receiver.data()) {
       PEANATS_ASSERT(!tokens.empty(), "missing tokens");
 
       auto from = tokens.front()._ptr;
-      auto dest = buf.data();
+      auto dest = receiver.data();
       auto distance = from - dest;
-      auto size = buf._cursor - from;
+      auto size = receiver._cursor - from;
 
       // move the data to the front of the buffer
       std::memmove(dest, from, size);
@@ -99,8 +99,8 @@ public:
         tokens[i]._ptr -= distance;
 
       // reset the cursor
-      buf._cursor -= distance;
-      buf._size = size;
+      receiver._cursor -= distance;
+      receiver._size = size;
 
       return;
     }
@@ -108,7 +108,7 @@ public:
     // Otherwise we have a packet that is too large
     logn("parser_error: buffer is too small to handle the packet");
     clear_state();
-    buf.clear();
+    receiver.clear();
     return;
   }
 

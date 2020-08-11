@@ -61,7 +61,7 @@ public:
     : Parser(this),
       server_ip(),
       server_port(),
-      recv_buf(buffer_size),      
+      receiver(buffer_size),
       inbox_counter(0),
       last_removed(0),
       _logger(0),
@@ -154,14 +154,14 @@ public:
   //! performs one receive/parse cycle
   void process()
   {
-    auto len = tcp_receive(recv_buf._cursor, recv_buf.want());
+    auto len = tcp_receive(receiver._cursor, receiver.want());
     if (len == Error) {
-      recv_buf.clear();
+      receiver.clear();
       return;
     }
 
-    recv_buf._size += len;
-    parse(recv_buf);
+    receiver._size += len;
+    parse(receiver);
   }
 
   //! disconnect and shut down the client
@@ -259,7 +259,7 @@ public:
 
   std::string server_ip;
   std::string server_port;
-  RecvBuffer recv_buf;                //!< parser buffer for incoming data
+  Receiver    receiver;               //!< Receiver for incoming tcp data
 
   OnConnectCallback on_connect_cb = [](Peanats*){};
 };

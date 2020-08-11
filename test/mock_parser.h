@@ -34,15 +34,15 @@ struct MockMessage {
 
 // A receive buffer that contains a hidden nullterminator
 // for easier debugging with msvc
-class MockRecvBuffer :
-  public RecvBuffer
+class MockReceiver :
+  public Receiver
 {
 public:
-  MockRecvBuffer(size_t size)
-    : RecvBuffer(size + 1) { _capacity--; }
+  MockReceiver(size_t size)
+    : Receiver(size + 1) { _capacity--; }
 
   void push_back(const char c) {
-    RecvBuffer::push_back(c);
+    Receiver::push_back(c);
     _data[_size] = 0;
   }
 };
@@ -54,7 +54,7 @@ public:
   MockParser(size_t buff_size = 512)
     : logger([](const std::string& s) {std::cerr << s;}),
       Parser(nullptr),
-      buf(buff_size) {}
+      receiver(buff_size) {}
       
 
   void  log(const std::string& s) { logger.log(s); }
@@ -73,8 +73,8 @@ public:
 
   // Feeds a string into the buffer until the buffer is full
   void fill_buf(std::string& from) {
-    while (buf.want() && !from.empty()) {
-      buf.push_back(from.front());
+    while (receiver.want() && !from.empty()) {
+      receiver.push_back(from.front());
       from.erase(from.begin());
     }
   }
@@ -87,7 +87,7 @@ public:
 
     do {
       fill_buf(s);
-      parse(buf);
+      parse(receiver);
     } while (!s.empty());
   }
 
@@ -109,7 +109,7 @@ public:
     int msg;
   } counters = { 0 };
 
-  MockRecvBuffer buf;
+  MockReceiver receiver;
 };
 
 

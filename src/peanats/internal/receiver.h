@@ -8,21 +8,21 @@
 PEANATS_NAMESPACE_BEGIN
 
 
-// [RecvBuffer]
+// [Receiver]
 // Helper class for managing a copy free and allocation
 // free receive buffer
-class RecvBuffer
+class Receiver
 {
 public:
   // ctor, 1k default 
-  RecvBuffer(size_t capacity = 1024)
+  Receiver(size_t capacity = 1024)
     : _data(new char[capacity]),
       _cursor(_data),
       _capacity(capacity),
       _size(0) {}
 
   // dtor
-  ~RecvBuffer() {
+  ~Receiver() {
     if (_capacity)
       delete[] _data;
   }

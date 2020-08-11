@@ -1,7 +1,6 @@
 #pragma once
 #include <peanats/internal/globals.h>
 #include <peanats/internal/peastring.h>
-#include <peanats/internal/recv_buffer.h>
 #include <assert.h>
 
 PEANATS_NAMESPACE_BEGIN

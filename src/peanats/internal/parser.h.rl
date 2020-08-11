@@ -163,10 +163,10 @@ inline const int Parser::first_final_state() {
   return %%{ write first_final; }%%;
 }
 
-inline void Parser::ragel_parser(RecvBuffer& buf)
+inline void Parser::ragel_parser(Receiver& receiver)
 {
-  char* p = buf._cursor;
-  char* pe = buf.data() + buf.have();
+  char* p = receiver._cursor;
+  char* pe = receiver.data() + receiver.have();
   char* eof = 0;
 
   //debug_logn("Parsing: " + support::human_readable(std::string(p, pe-p)));
@@ -175,7 +175,7 @@ inline void Parser::ragel_parser(RecvBuffer& buf)
 
   // store the new cursor and the caller will do the required
   // adjustments to the buffer
-  buf._cursor = p;
+  receiver._cursor = p;
 }
 
 
