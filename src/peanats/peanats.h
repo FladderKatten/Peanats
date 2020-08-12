@@ -137,6 +137,20 @@ public:
     }
   }
 
+  //! publish a request on a subject.
+  void request(const std::string& subject, const std::string& payload, MessageCallback cb) {
+
+    auto inbox = generate_inbox_name();
+
+    subscribe(inbox, [=](Message& msg) {
+      cb(msg);
+      unsubscribe(msg.sid);
+      });
+
+    std::string s = "PUB " + subject + " " + std::to_string(payload.length()) + "\r\n";
+    s += payload + "\r\n";
+  }
+
 
   // publish a 'Payload' to a 'Subject'
   void publish(const std::string& topic, const std::string& payload = "") {
