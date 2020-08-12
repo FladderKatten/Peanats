@@ -260,7 +260,9 @@ protected:
     return subs.size();
   }
 
-  //! Remove a subscription from the list
+  //! Adds a callback to the list.
+  //! @param cb is the callback
+  //! @return the subscription id
   Sid register_subscription(MessageCallback cb) {
     auto sid = allocate_subscriber();
     subs[sid].cb = cb;
