@@ -122,6 +122,9 @@ public:
   // Attach a 'Logger' to the client
   void attach(Logger* logger) { _logger = logger; }
 
+  //! Attach a 'OnConnectCallback' to the client
+  void attach(OnConnectCallback cb) { on_connect_cb = cb; }
+
   // ---====================================================================---
   // [ Api ]
   // ---====================================================================---
