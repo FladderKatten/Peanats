@@ -126,6 +126,15 @@ public:
   // [ Api ]
   // ---====================================================================---
 
+  //! reply to a 'Message' with a optional payload
+  void reply(Message& msg, const std::string& payload = "")
+  {
+    if (!msg.replyto.empty()) {
+      publish(msg.replyto, payload);
+    }
+  }
+
+
   // publish a 'Payload' to a 'Subject'
   void publish(const std::string& topic, const std::string& payload = "") {
     std::string s = "PUB " + topic + " " + std::to_string(payload.length()) + "\r\n";
