@@ -37,23 +37,46 @@ You will need:
 
 ### Use
 
-*under construction, see examples*
+First of all, the api is not final and may have been changed when reading this.
+
+Peanats is entirely contained in the namespace '**peanats**', so in case of ambiguous names you can always specify to the compiler what you mean.
+
+The main class of Peanats is the **Client** which is derived from **Peanats**. The only difference between these are that Peanats doesn't have any tcp code and its up to the user to define these when creating the **Client**'s. This is what makes peanats somewhat portable as you can create your own Client classes with custom platform specific tcp code. There are two prewritten '**Client**' classes located in "peanats/client.h". Including this file will declare a **Client** with the tcp specific code for either linux or windows depending on what host os is used when compiling. If you want to write your own tcp code you instead include "peanats/peanats.h".
+
+The client's constructor specifies how large (or small) tcp receive buffer you want to use and this will also be the maximum total packet size that peanats can handle. So if you are on a tight memory budget, keeping your subjects and payloads small, you could probably get away with a buffer of only like 50 bytes, perfect for Arduino and embedded.
+
+Now when you've instantiated a **Client** class you *could* attach a '**Logger**' class to it. This is a convenience feature that allows you redirect the internal logging to a custom callback where you can do anything you want with it. For example write it to the console, a file, syslog etc. This feature is disabled by default but will start outputting once a logger is attached. You can also entirely disable all the logging code by defining **PEANATS_NO_LOGGING** when compiling. *Example of a syslogger attached with a lamda function callback:*
+
+```
+client.attach(Logger([](const char* str, size_t len) { syslog(LOG_INFO, s); }))
+```
+
+At this point its time to override the **on_connect_cb** which peanats will call after connecting to a server. This callback will also trigger whenever peanats reconnects. Since peanats also support *capturing lambdas*, local function variables and arguments are not a problem. Example:
+
+```cpp
+client.on_connect_cb = [&](Peanats* cli) { std::cout << argv[0] << " has connected!\n"; };
+```
+
+In the connect callback we put our initial subscriptions and whatever other code we want. Subscriptions are created with '**client::subscribe**' which allows you to specify a **MessageCallback** function which will trigger when something is published on that subject. The return value of the subscribe is a id which you later use to unsubscribe. The callback argument is a **Message** reference which contains the subject, id, reply-to & payload. Example
+
+```cpp
+// answer anyone who posted on subject "hello" with "world"
+auto hello = [](Message& msg) {
+    m.client.reply(msg, "world");
+}
+```
 
 
 
-### Example code
+From here the api should be pretty self explementary.
+
+
+
+### Full Example
 
 *example/nats_log.cpp*
 
 - ```cpp
-  // example/nats_pub.cpp
-  //
-  // peanats commandline example program that publishes
-  // a userdefined payload on a userdefined local nats subject
-  //
-  // http://github.com/fladderkatten/peanats
-  //
-  
   #include <string>
   #include <iostream>
   #include <peanats/client.h>

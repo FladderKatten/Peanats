@@ -18,3 +18,4 @@ src/peanats/internal/autogen/ragel_parser.h
 nats_pub
 nats_sub
 *.sln
+docs/ 
